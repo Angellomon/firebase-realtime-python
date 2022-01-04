@@ -4,11 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-google-cloud-firestore = "*"
 loguru = "*"
 pydantic = "*"
 fastapi = "*"
 uvicorn = "*"
+firebase-admin = "*"
 
 [dev-packages]
 black = "*"
