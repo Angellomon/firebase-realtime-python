@@ -7,6 +7,8 @@ name = "pypi"
 google-cloud-firestore = "*"
 loguru = "*"
 pydantic = "*"
+fastapi = "*"
+uvicorn = "*"
 
 [dev-packages]
 black = "*"
@@ -15,7 +17,7 @@ rope = "*"
 isort = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
