@@ -1,48 +1,39 @@
-import threading
-
+import firebase_admin
 from fastapi import FastAPI
 from loguru import logger
 
-from .firestore import get_firestore_db
+from app.firestore.auth import create_user_firebase
 
-usuarios_done = threading.Event()
+from .firestore import get_watcher_usuarios
+from .security import generate_password
 
-
-def test_print_doc():
-    db = get_firestore_db()
-
-    doc = db.collection("usuarios").document("1cVZmKPpbzLiGdQthnqT")
-
-    logger.debug(doc.get().to_dict())
+app = FastAPI()
 
 
-def on_snapshot(doc_snapshot, changes, read_time):
-    logger.debug(
-        f"doc_snapshot: {type(doc_snapshot)}, changes: {type(changes)}, read_time: {type(read_time)}"
-    )
-    for doc in doc_snapshot:
-        logger.debug(f"doc_id: {doc.id}, data: {doc.to_dict()}")
-
-    usuarios_done.set()
+def on_startup():
+    firebase_admin.initialize_app()
+    get_watcher_usuarios()
 
 
-def test_on_snapshot():
-    db = get_firestore_db()
+def on_shutdown():
+    watch_usuarios = get_watcher_usuarios()
 
-    usuarios_col = db.collection("usuarios")
-
-    watch_usuarios = usuarios_col.on_snapshot(on_snapshot)
-
-    logger.debug(watch_usuarios)
-
-    usuarios_done.wait()
+    watch_usuarios.unsubscribe()
 
 
-def main():
-
-    test_print_doc()
-    test_on_snapshot()
+app.add_event_handler("startup", on_startup)
+app.add_event_handler("shutdown", on_shutdown)
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+async def test():
+    p = generate_password()
+    user_data = {
+        "display_name": "testerio",
+        "email": "someone@somewhere.land",
+        "password": p,
+    }
+
+    user = create_user_firebase(user_data)
+
+    logger.debug(f"user: {user}, {p}")
