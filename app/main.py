@@ -4,6 +4,7 @@ from loguru import logger
 
 from app.firestore.auth import create_user_firebase
 
+from .clients import create_client
 from .firestore import get_watcher_usuarios
 from .security import generate_password
 
@@ -37,3 +38,8 @@ async def test():
     user = create_user_firebase(user_data)
 
     logger.debug(f"user: {user}, {p}")
+
+    client_data = {"nombre": "test", "movimientos": [], "actualizar": False}
+
+    client = create_client(client_data, user.uid)
+    logger.debug(f"client: {client}")
